@@ -1,0 +1,37 @@
+# Cria uma Application no ArgoCD para cada pasta apps/<app>/environments/staging.
+# Para subir uma app nova em staging, basta criar a pasta e dar push.
+#
+# ATENÇÃO: troque SEU_USUARIO pelo seu usuário do GitHub (duas vezes neste arquivo).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: staging
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/SEU_USUARIO/gitops-starter.git
+        revision: main
+        directories:
+          - path: apps/*/environments/staging
+  template:
+    metadata:
+      # apps/podinfo/environments/staging -> podinfo-staging
+      name: '{{ index .path.segments 1 }}-staging'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/SEU_USUARIO/gitops-starter.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: staging
+      syncPolicy:
+        automated:
+          prune: true     # apaga do cluster o que foi apagado do Git
+          selfHeal: true  # desfaz mudanças feitas na mão no cluster
+        syncOptions:
+          - CreateNamespace=true

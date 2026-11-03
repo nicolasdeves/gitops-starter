@@ -1,0 +1,37 @@
+# Cria uma Application no ArgoCD para cada pasta apps/<app>/environments/production.
+# Para subir uma app nova em production, basta criar a pasta e dar push.
+#
+# ATENÇÃO: troque SEU_USUARIO pelo seu usuário do GitHub (duas vezes neste arquivo).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: production
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/SEU_USUARIO/gitops-starter.git
+        revision: main
+        directories:
+          - path: apps/*/environments/production
+  template:
+    metadata:
+      # apps/podinfo/environments/production -> podinfo-production
+      name: '{{ index .path.segments 1 }}-production'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/SEU_USUARIO/gitops-starter.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: production
+      syncPolicy:
+        automated:
+          prune: true     # apaga do cluster o que foi apagado do Git
+          selfHeal: true  # desfaz mudanças feitas na mão no cluster
+        syncOptions:
+          - CreateNamespace=true

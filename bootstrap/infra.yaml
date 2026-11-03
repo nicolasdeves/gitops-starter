@@ -1,0 +1,28 @@
+# Aplica tudo o que está na pasta infra/ (as rotas de cada ambiente).
+#
+# ATENÇÃO: troque SEU_USUARIO pelo seu usuário do GitHub.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SEU_USUARIO/gitops-starter.git
+    targetRevision: main
+    path: infra
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    # Os namespaces staging e production são criados pelos ApplicationSets.
+    # Se a infra sincronizar antes deles existirem, ela tenta de novo.
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

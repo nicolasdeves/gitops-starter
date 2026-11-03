@@ -1,0 +1,23 @@
+# Rotas do ambiente staging. Quem recebe as requisições é o Traefik, que já vem no k3s.
+# Acesso: http://<IP-DA-VM>/staging
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: podinfo
+  namespace: staging
+spec:
+  ingressClassName: traefik
+  rules:
+    # Sem "host", a regra vale para qualquer endereço, inclusive o IP da VM.
+    # Para usar um domínio, troque a linha "- http:" abaixo por estas duas:
+    # - host: staging.seudominio.com.br
+    #   http:
+    - http:
+        paths:
+          - path: /staging
+            pathType: Prefix
+            backend:
+              service:
+                name: podinfo
+                port:
+                  number: 9898

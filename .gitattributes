@@ -1,0 +1,4 @@
+# Scripts precisam de fim de linha Unix para rodar na VM, mesmo editados no Windows
+*.sh   text eol=lf
+*.yaml text eol=lf
+*.md   text eol=lf

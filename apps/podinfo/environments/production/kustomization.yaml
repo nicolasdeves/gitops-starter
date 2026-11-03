@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+
+# Versão da imagem neste ambiente.
+# Para promover a versão de staging, copie a tag de lá para cá.
+images:
+  - name: ghcr.io/stefanprodan/podinfo
+    newTag: "6.16.0"
+
+replicas:
+  - name: podinfo
+    count: 2
+
+# Valores do ambiente. Mude a cor ou a mensagem, dê push e veja a página mudar.
+configMapGenerator:
+  - name: podinfo-config
+    behavior: merge
+    literals:
+      - "PODINFO_PREFIX=/production"
+      - "PODINFO_UI_COLOR=#16a34a"
+      - "PODINFO_UI_MESSAGE=Tech Talks Day - production"
+
+# Os health checks precisam do mesmo prefixo da URL
+# Não precisaria se no ingress tivesse um domínio
+patches:
+  - target:
+      kind: Deployment
+      name: podinfo
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/path
+        value: /production/healthz
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/path
+        value: /production/readyz

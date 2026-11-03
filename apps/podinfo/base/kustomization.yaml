@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+
+# O ConfigMap é gerado com um hash no nome (ex.: podinfo-config-7f9c2k).
+# Quando um valor muda, o nome muda, e o Kubernetes recria os pods com o valor novo.
+configMapGenerator:
+  - name: podinfo-config
+    literals:
+      - "PODINFO_PREFIX=/"
+      - "PODINFO_UI_COLOR=#34577c"
+      - "PODINFO_UI_MESSAGE=Olá do podinfo"

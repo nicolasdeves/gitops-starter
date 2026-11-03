@@ -55,7 +55,7 @@ Clique em **Fork** no topo desta página. O ArgoCD vai ler o **seu** fork, porqu
 
 ### 2. Aponte o bootstrap para o seu fork
 
-Nos três arquivos de `bootstrap/`, troque `SEU_USUARIO` pelo seu usuário do GitHub:
+Nos três arquivos de `bootstrap/`, troque `nicolasdeves` pelo seu usuário do GitHub:
 
 - `bootstrap/applicationset-staging.yaml` (duas vezes)
 - `bootstrap/applicationset-production.yaml` (duas vezes)
@@ -63,14 +63,14 @@ Nos três arquivos de `bootstrap/`, troque `SEU_USUARIO` pelo seu usuário do Gi
 
 Dá para editar direto no site do GitHub (ícone de lápis) e fazer o commit por lá.
 
-> Se pular este passo, o ArgoCD procura um repo que não existe e as apps não aparecem.
+> Se pular este passo, o ArgoCD continua lendo o repo original, e os seus pushes não mudam nada no cluster.
 
 ### 3. Leve o script para a VM
 
 Só o script vai para a VM; o repo fica no GitHub, onde o ArgoCD vai lê-lo.
 
 ```bash
-curl -sLO https://raw.githubusercontent.com/SEU_USUARIO/gitops-starter/main/install.sh
+curl -sLO https://raw.githubusercontent.com/nicolasdeves/gitops-starter/main/install.sh
 ```
 
 Leia o script antes de rodar. É uma boa prática com qualquer script baixado da internet.
@@ -124,7 +124,7 @@ O cluster volta para o estado anterior. Rollback é um commit.
 ## Desinstalar
 
 ```bash
-curl -sLO https://raw.githubusercontent.com/SEU_USUARIO/gitops-starter/main/uninstall.sh
+curl -sLO https://raw.githubusercontent.com/nicolasdeves/gitops-starter/main/uninstall.sh
 sudo bash uninstall.sh
 ```
 
@@ -134,7 +134,8 @@ Remove o k3s, o ArgoCD e todas as apps da VM. O seu repo no GitHub não é tocad
 
 | Sintoma | O que fazer |
 |---|---|
-| Só a app `bootstrap` aparece no ArgoCD, com erro | Os arquivos de `bootstrap/` ainda estão com `SEU_USUARIO`. Veja o passo 2. |
+| ApplicationSet com erro "Repository not found" | O `repoURL` em `bootstrap/` está errado (usuário ou nome do repo). Veja o passo 2. |
+| Dou push no meu fork e nada muda no cluster | Os arquivos de `bootstrap/` ainda apontam para `nicolasdeves`. Veja o passo 2. |
 | A app `infra` fica em erro no começo | Normal: ela espera os namespaces que os ApplicationSets criam, e tenta de novo sozinha. |
 | `404` em `http://<IP>/staging` | O podinfo ainda está subindo, ou a app `infra` ainda não sincronizou. Espere um minuto. |
 | Mudei o Git e nada aconteceu | Clique em **Refresh** no ArgoCD, ou espere até 3 minutos. Confira se o push foi para a branch `main`. |
